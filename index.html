@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Título y descripción: es lo que muestra Google y WhatsApp al compartir el enlace -->
+  <title>Nudos y Pañoletas · Juegos para reuniones scout</title>
+  <meta name="description" content="Juegos para reuniones scout, compartidos por dirigentes. Busca por rama, nivel de riesgo y cantidad de scouts, o publica el tuyo.">
+  <meta property="og:title" content="Nudos y Pañoletas">
+  <meta property="og:description" content="Juegos para reuniones scout, compartidos por dirigentes.">
+  <!-- Cuando tengas la dirección final, cambia esta ruta por la completa,
+       por ejemplo: https://nudosypanoletas.vercel.app/img/logo.jpg -->
+  <meta property="og:image" content="img/logo.jpg">
+
+  <link rel="icon" type="image/png" href="img/favicon.png">
+
+  <!-- Tipografías: Fredoka para títulos (redondeada como el logo) y Nunito para textos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+
+  <!-- ============================================================
+       CABECERA: logo, nombre y botón para publicar
+       ============================================================ -->
+  <header class="cabecera">
+    <div class="cabecera__contenido">
+      <a class="marca" href="./" aria-label="Nudos y Pañoletas, inicio">
+        <img class="marca__logo" src="img/logo.jpg" alt="" width="72" height="72">
+        <span class="marca__textos">
+          <span class="marca__nombre">Nudos y Pañoletas</span>
+          <span class="marca__lema">Juegos para reuniones scout, compartidos por dirigentes</span>
+        </span>
+      </a>
+      <button type="button" class="boton boton--principal" id="btn-publicar">Publicar un juego</button>
+    </div>
+  </header>
+
+  <!-- Franja decorativa que imita una cuerda (se dibuja en el CSS) -->
+  <div class="cuerda" aria-hidden="true"></div>
+
+  <main class="principal">
+
+    <!-- ============================================================
+         BUSCADOR Y FILTROS
+         Si agregas un filtro aquí, también hay que leerlo en
+         js/app.js (sección 6, "Filtros y búsqueda").
+         ============================================================ -->
+    <section class="buscador" aria-label="Buscar juegos">
+      <label class="buscador__texto">
+        <span class="solo-lectores">Buscar juegos</span>
+        <input type="search" id="busqueda" placeholder="Busca por nombre, material o instrucción" autocomplete="off">
+      </label>
+
+      <label class="buscador__filtro">
+        <span class="solo-lectores">Rama</span>
+        <select id="filtro-rama">
+          <option value="">Todas las ramas</option>
+          <option value="lobatos">Lobatos</option>
+          <option value="scouts">Scouts</option>
+          <option value="caminantes">Caminantes</option>
+          <option value="rovers">Rovers</option>
+        </select>
+      </label>
+
+      <label class="buscador__filtro">
+        <span class="solo-lectores">Nivel de riesgo</span>
+        <select id="filtro-riesgo">
+          <option value="">Cualquier riesgo</option>
+          <option value="bajo">Riesgo bajo</option>
+          <option value="medio">Riesgo medio</option>
+          <option value="alto">Riesgo alto</option>
+        </select>
+      </label>
+
+      <label class="buscador__filtro">
+        <span class="solo-lectores">Tipo de juego</span>
+        <select id="filtro-tipo">
+          <option value="">Activos y pasivos</option>
+          <option value="activo">Activos</option>
+          <option value="pasivo">Pasivos</option>
+        </select>
+      </label>
+
+      <label class="casilla">
+        <input type="checkbox" id="filtro-aplicativo">
+        <span>Solo aplicativos</span>
+      </label>
+    </section>
+
+    <!-- Cantidad de juegos encontrados (lo escribe app.js) -->
+    <p class="resumen" id="resumen" aria-live="polite"></p>
+
+    <!-- Aquí app.js dibuja las fichas de los juegos -->
+    <div class="lista" id="lista"></div>
+  </main>
+
+  <!-- ============================================================
+       PIE DE PÁGINA
+       ============================================================ -->
+  <footer class="pie">
+    <p><strong>Cuidamos a los scouts.</strong> No publiques nombres, fotos ni datos de menores. Cada juego se revisa antes de aparecer en la página.</p>
+    <p>Síguenos en Instagram: <a href="https://instagram.com/nudosypanoletas" target="_blank" rel="noopener">@nudosypanoletas</a></p>
+  </footer>
+
+
+  <!-- ============================================================
+       VENTANA: DETALLE DE UN JUEGO
+       El contenido lo llena app.js (sección 8).
+       ============================================================ -->
+  <dialog class="ventana" id="ventana-juego" aria-labelledby="detalle-titulo">
+    <button type="button" class="ventana__cerrar" data-cerrar aria-label="Cerrar">×</button>
+    <div id="detalle"></div>
+  </dialog>
+
+
+  <!-- ============================================================
+       VENTANA: FORMULARIO PARA PUBLICAR UN JUEGO
+       Los "name" de cada campo coinciden con las columnas de la
+       tabla "juegos" en Supabase. Los "maxlength" coinciden con
+       los límites del archivo supabase/esquema.sql.
+       ============================================================ -->
+  <dialog class="ventana" id="ventana-publicar" aria-labelledby="publicar-titulo">
+    <button type="button" class="ventana__cerrar" data-cerrar aria-label="Cerrar">×</button>
+
+    <form id="formulario" novalidate>
+      <h2 class="ventana__titulo" id="publicar-titulo">Publicar un juego</h2>
+      <p class="ventana__nota">Antes de aparecer en la página, revisamos cada juego. Suele tomar uno o dos días.</p>
+
+      <div class="campo">
+        <label for="f-titulo">Nombre del juego</label>
+        <input id="f-titulo" name="titulo" type="text" required minlength="3" maxlength="120" placeholder="Ej: La isla del tesoro">
+      </div>
+
+      <div class="campo">
+        <label for="f-descripcion">¿En qué consiste?</label>
+        <textarea id="f-descripcion" name="descripcion" required minlength="10" maxlength="5000" rows="5" placeholder="Explica la dinámica y las reglas para que otro dirigente pueda hacerlo"></textarea>
+      </div>
+
+      <div class="campo">
+        <label for="f-materiales">Materiales</label>
+        <textarea id="f-materiales" name="materiales" required maxlength="1000" rows="2" placeholder="Ej: pañoletas, conos, una soga de 5 metros. Si no necesita nada, escribe: ninguno"></textarea>
+      </div>
+
+      <div class="campo-doble">
+        <div class="campo">
+          <label for="f-rama">Rama</label>
+          <select id="f-rama" name="rama" required>
+            <option value="">Elige una rama</option>
+            <option value="lobatos">Lobatos</option>
+            <option value="scouts">Scouts</option>
+            <option value="caminantes">Caminantes</option>
+            <option value="rovers">Rovers</option>
+            <option value="todas">Sirve para todas</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="f-cantidad">¿Para cuántos scouts?</label>
+          <input id="f-cantidad" name="cantidad" type="text" required maxlength="60" placeholder="Ej: de 10 a 20">
+        </div>
+      </div>
+
+      <!-- Grupos de botones de opción (radio): se ven como botones en el CSS -->
+      <fieldset class="campo opciones">
+        <legend>Nivel de riesgo</legend>
+        <label><input type="radio" name="riesgo" value="bajo" required><span>Bajo</span></label>
+        <label><input type="radio" name="riesgo" value="medio"><span>Medio</span></label>
+        <label><input type="radio" name="riesgo" value="alto"><span>Alto</span></label>
+      </fieldset>
+
+      <fieldset class="campo opciones">
+        <legend>Tipo de juego</legend>
+        <label><input type="radio" name="tipo" value="activo" required><span>Activo</span></label>
+        <label><input type="radio" name="tipo" value="pasivo"><span>Pasivo</span></label>
+      </fieldset>
+
+      <label class="casilla">
+        <input type="checkbox" name="aplicativo" id="f-aplicativo">
+        <span>Es un juego aplicativo (sirve para practicar una instrucción)</span>
+      </label>
+
+      <!-- Solo se muestra si marcan "aplicativo" (lo controla app.js) -->
+      <div class="campo" id="campo-instruccion" hidden>
+        <label for="f-instruccion">¿Qué instrucción practica?</label>
+        <input id="f-instruccion" name="tipo_instruccion" type="text" maxlength="120" placeholder="Ej: nudos, orientación, primeros auxilios">
+      </div>
+
+      <h3 class="ventana__subtitulo">Sobre ti <span>(opcional)</span></h3>
+      <div class="campo-doble">
+        <div class="campo">
+          <label for="f-autor">Tu nombre o totem</label>
+          <input id="f-autor" name="autor" type="text" maxlength="80" placeholder="Ej: Halcón Sereno">
+        </div>
+        <div class="campo">
+          <label for="f-pais">País</label>
+          <input id="f-pais" name="pais" type="text" maxlength="60" list="paises" placeholder="Ej: Perú">
+          <datalist id="paises">
+            <option value="Argentina"><option value="Bolivia"><option value="Chile"><option value="Colombia">
+            <option value="Costa Rica"><option value="Ecuador"><option value="España"><option value="Guatemala">
+            <option value="México"><option value="Paraguay"><option value="Perú"><option value="Uruguay"><option value="Venezuela">
+          </datalist>
+        </div>
+      </div>
+      <div class="campo">
+        <label for="f-grupo">Grupo scout</label>
+        <input id="f-grupo" name="grupo_scout" type="text" maxlength="120" placeholder="Ej: Grupo 52 Santa Rosa">
+      </div>
+
+      <!-- Trampa para robots: las personas no ven este campo; si llega lleno, es spam -->
+      <div class="trampa" aria-hidden="true">
+        <label for="f-web">No llenar</label>
+        <input id="f-web" name="sitio_web" type="text" tabindex="-1" autocomplete="off">
+      </div>
+
+      <label class="casilla">
+        <input type="checkbox" id="f-cuidado" required>
+        <span>Confirmo que el juego no incluye nombres, fotos ni datos de menores.</span>
+      </label>
+
+      <!-- Mensajes de error del formulario (los escribe app.js) -->
+      <p class="formulario__error" id="error-formulario" role="alert" hidden></p>
+
+      <div class="ventana__acciones">
+        <button type="button" class="boton boton--secundario" data-cerrar>Cancelar</button>
+        <button type="submit" class="boton boton--principal" id="btn-enviar">Enviar juego</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Aviso flotante breve, por ejemplo "Enlace copiado" -->
+  <div class="aviso-flotante" id="aviso-flotante" role="status" aria-live="polite"></div>
+
+
+  <!-- ============================================================
+       SCRIPTS
+       1. La librería oficial de Supabase (versión fija para que no cambie sola)
+       2. La configuración con las claves del proyecto
+       3. La lógica de la página
+       ============================================================ -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,475 @@
+/* =====================================================================
+   NUDOS Y PAÑOLETAS · Estilos
+   =====================================================================
+   Índice:
+     1. Colores y medidas (cámbialos aquí y se actualiza toda la página)
+     2. Base
+     3. Cabecera y cuerda
+     4. Buscador y filtros
+     5. Lista de juegos (fichas)
+     6. Parche de riesgo
+     7. Botones
+     8. Ventanas (detalle y formulario)
+     9. Pie de página y avisos
+    10. Celulares
+   ===================================================================== */
+
+
+/* ---------------------------------------------------------------------
+   1. COLORES Y MEDIDAS
+   Son los colores del logo. Si cambias uno aquí, cambia en toda la
+   página porque el resto del archivo usa estos nombres (var(--...)).
+   --------------------------------------------------------------------- */
+:root {
+  --verde:        #2B4F10;  /* Verde bosque: cabecera y títulos */
+  --verde-hoja:   #4A7C30;  /* Verde más claro: detalles */
+  --marino:       #1E2D5E;  /* Azul de la pañoleta: filtros y textos secundarios */
+  --naranja:      #D4680A;  /* Naranja de la "y": botón principal */
+  --naranja-osc:  #9E4A06;  /* Sombra del botón principal */
+  --cuerda:       #C8A24E;  /* Dorado de la cuerda */
+  --cuerda-osc:   #7A5A1C;
+  --crema:        #F7F1E2;  /* Fondo de la página */
+  --papel:        #FFFDF6;  /* Fondo de fichas y ventanas */
+  --tinta:        #1F1A0E;  /* Texto principal */
+  --tinta-suave:  #5A4F2E;  /* Texto secundario */
+  --linea:        #E4D5A8;  /* Bordes */
+
+  /* Colores del nivel de riesgo */
+  --riesgo-bajo:  #2B6E28;
+  --riesgo-medio: #A8650C;
+  --riesgo-alto:  #A8321A;
+
+  --radio: 14px;            /* Redondeo de esquinas */
+  --ancho: 1100px;          /* Ancho máximo del contenido */
+
+  --fuente-titulos: "Fredoka", "Nunito", system-ui, sans-serif;
+  --fuente-texto: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+
+/* ---------------------------------------------------------------------
+   2. BASE
+   --------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--fuente-texto);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--tinta);
+  background: var(--crema);
+}
+
+img { max-width: 100%; display: block; }
+a { color: var(--marino); }
+
+/* Borde visible cuando se navega con teclado (accesibilidad) */
+:focus-visible {
+  outline: 3px solid var(--naranja);
+  outline-offset: 2px;
+}
+
+/* Texto que solo leen los lectores de pantalla (personas ciegas) */
+.solo-lectores {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.principal {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: 28px 20px 48px;
+}
+
+
+/* ---------------------------------------------------------------------
+   3. CABECERA Y CUERDA
+   --------------------------------------------------------------------- */
+.cabecera {
+  background: var(--verde);
+  color: var(--crema);
+}
+.cabecera__contenido {
+  max-width: var(--ancho);
+  margin: 0 auto;
+  padding: 22px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: inherit;
+  text-decoration: none;
+}
+.marca__logo {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  border: 3px solid var(--cuerda);
+  background: var(--papel);
+}
+.marca__textos { display: flex; flex-direction: column; }
+.marca__nombre {
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 4vw, 2.3rem);
+  line-height: 1.1;
+}
+.marca__lema { color: #D9E4C8; font-size: 0.95rem; }
+
+/* La cuerda: dos tonos en diagonal que se repiten, como una soga torcida */
+.cuerda {
+  height: 12px;
+  background:
+    repeating-linear-gradient(
+      -55deg,
+      var(--cuerda) 0 9px,
+      var(--cuerda-osc) 9px 12px
+    );
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+}
+
+
+/* ---------------------------------------------------------------------
+   4. BUSCADOR Y FILTROS
+   --------------------------------------------------------------------- */
+.buscador {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.buscador__texto { flex: 1 1 280px; }
+
+.buscador input[type="search"],
+.buscador select {
+  width: 100%;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--tinta);
+  background: var(--papel);
+  border: 2px solid var(--linea);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.buscador input[type="search"]:focus,
+.buscador select:focus { border-color: var(--marino); outline: none; }
+.buscador__filtro { flex: 0 1 185px; }
+
+/* Casilla de verificación con texto (se usa en filtros y formulario) */
+.casilla {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.casilla input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--naranja); flex-shrink: 0; }
+
+.resumen {
+  margin: 18px 0 14px;
+  color: var(--tinta-suave);
+  font-weight: 600;
+}
+
+
+/* ---------------------------------------------------------------------
+   5. LISTA DE JUEGOS (FICHAS)
+   Cada ficha es un botón: al hacer clic se abre el detalle.
+   --------------------------------------------------------------------- */
+.lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.ficha {
+  /* Quitamos el estilo por defecto de los botones */
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 18px 16px;
+  background: var(--papel);
+  border: 2px solid var(--linea);
+  border-radius: var(--radio);
+  transition: border-color 0.15s;
+}
+.ficha:hover { border-color: var(--verde-hoja); }
+
+.ficha__cabeza {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.ficha__rama { font-size: 0.85rem; font-weight: 700; color: var(--marino); }
+
+.ficha__titulo {
+  margin: 0;
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 1.3rem;
+  line-height: 1.2;
+  color: var(--verde);
+}
+
+/* La descripción se corta a 3 líneas en la ficha */
+.ficha__descripcion {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--tinta-suave);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.etiquetas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 6px; }
+.etiqueta {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #EEF2E6;
+  color: var(--verde);
+}
+.etiqueta--activo { background: #FBE6D3; color: var(--naranja-osc); }
+.etiqueta--pasivo { background: #E3E7F2; color: var(--marino); }
+
+/* Mensaje cuando no hay juegos, hay un error o está cargando */
+.mensaje {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px 20px;
+  border: 2px dashed var(--linea);
+  border-radius: var(--radio);
+  color: var(--tinta-suave);
+}
+.mensaje h2 {
+  margin: 0 0 6px;
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  color: var(--verde);
+}
+.mensaje p { margin: 0 auto 16px; max-width: 46ch; }
+
+
+/* ---------------------------------------------------------------------
+   6. PARCHE DE RIESGO
+   Imita una insignia bordada: borde de puntadas (dashed) por dentro.
+   --------------------------------------------------------------------- */
+.parche {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 8px;
+  outline: 1.5px dashed rgba(255, 255, 255, 0.75);
+  outline-offset: -4px;
+  white-space: nowrap;
+}
+.parche--bajo  { background: var(--riesgo-bajo); }
+.parche--medio { background: var(--riesgo-medio); }
+.parche--alto  { background: var(--riesgo-alto); }
+
+
+/* ---------------------------------------------------------------------
+   7. BOTONES
+   --------------------------------------------------------------------- */
+.boton {
+  font: inherit;
+  font-weight: 800;
+  border: none;
+  border-radius: 999px;
+  padding: 11px 22px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.boton:active { transform: translateY(2px); }
+.boton:disabled { opacity: 0.6; cursor: wait; }
+
+.boton--principal {
+  background: var(--naranja);
+  color: #fff;
+  box-shadow: 0 3px 0 var(--naranja-osc);
+}
+.boton--secundario {
+  background: transparent;
+  color: var(--tinta-suave);
+  border: 2px solid var(--linea);
+}
+
+
+/* ---------------------------------------------------------------------
+   8. VENTANAS (detalle y formulario)
+   Usamos <dialog>, que el navegador ya sabe abrir y cerrar.
+   --------------------------------------------------------------------- */
+.ventana {
+  width: min(640px, calc(100% - 24px));
+  max-height: calc(100% - 40px);
+  padding: 28px 26px 24px;
+  border: none;
+  border-radius: 18px;
+  background: var(--papel);
+  color: var(--tinta);
+}
+.ventana::backdrop { background: rgba(20, 30, 10, 0.55); }
+
+.ventana__cerrar {
+  position: absolute;
+  top: 12px; right: 14px;
+  width: 36px; height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--tinta-suave);
+  cursor: pointer;
+}
+.ventana__cerrar:hover { background: var(--crema); }
+
+.ventana__titulo {
+  margin: 0 40px 6px 0;
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 1.7rem;
+  line-height: 1.15;
+  color: var(--verde);
+}
+.ventana__nota { margin: 0 0 20px; color: var(--tinta-suave); font-size: 0.95rem; }
+.ventana__subtitulo {
+  margin: 22px 0 10px;
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--marino);
+}
+.ventana__subtitulo span { font-family: var(--fuente-texto); font-weight: 400; font-size: 0.9rem; color: var(--tinta-suave); }
+.ventana__acciones { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+
+/* Detalle de un juego */
+.detalle__datos { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 18px; }
+.detalle__bloque { margin-bottom: 18px; }
+.detalle__bloque h3 {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--marino);
+}
+.detalle__bloque p { margin: 0; white-space: pre-wrap; }
+.detalle__autor { color: var(--tinta-suave); font-size: 0.9rem; margin: 0; }
+
+/* Campos del formulario */
+.campo { margin-bottom: 14px; border: none; padding: 0; min-width: 0; }
+.campo label, .campo legend { display: block; font-weight: 700; font-size: 0.92rem; margin-bottom: 5px; padding: 0; }
+.campo input[type="text"], .campo textarea, .campo select {
+  width: 100%;
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 9px 11px;
+  border: 2px solid var(--linea);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--tinta);
+}
+.campo textarea { resize: vertical; }
+.campo input:focus, .campo textarea:focus, .campo select:focus { border-color: var(--naranja); outline: none; }
+.campo-doble { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+
+/* Campo marcado como incorrecto por app.js */
+.campo input.invalido,
+.campo textarea.invalido,
+.campo select.invalido { border-color: var(--riesgo-alto); }
+
+/* Botones de opción (riesgo y tipo): el círculo se oculta y la etiqueta parece botón */
+.opciones { display: flex; flex-wrap: wrap; gap: 8px; }
+.opciones legend { width: 100%; }
+.opciones label { margin: 0; font-weight: 700; cursor: pointer; }
+.opciones input { position: absolute; opacity: 0; pointer-events: none; }
+.opciones span {
+  display: inline-block;
+  padding: 8px 18px;
+  border: 2px solid var(--linea);
+  border-radius: 999px;
+  background: #fff;
+}
+.opciones input:checked + span { background: var(--marino); border-color: var(--marino); color: #fff; }
+.opciones input:focus-visible + span { outline: 3px solid var(--naranja); outline-offset: 2px; }
+.opciones.invalido span { border-color: var(--riesgo-alto); }
+
+/* Campo trampa para robots: fuera de la pantalla */
+.trampa { position: absolute; left: -9999px; }
+
+.formulario__error {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #F8E1DA;
+  color: var(--riesgo-alto);
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+/* Mensaje de agradecimiento después de enviar */
+.gracias { text-align: center; padding: 18px 0 4px; }
+.gracias p { color: var(--tinta-suave); max-width: 44ch; margin: 0 auto 20px; }
+
+
+/* ---------------------------------------------------------------------
+   9. PIE DE PÁGINA Y AVISOS
+   --------------------------------------------------------------------- */
+.pie {
+  border-top: 2px solid var(--linea);
+  padding: 24px 20px 36px;
+  text-align: center;
+  color: var(--tinta-suave);
+  font-size: 0.92rem;
+}
+.pie p { max-width: 640px; margin: 0 auto 6px; }
+
+.aviso-flotante {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translate(-50%, 20px);
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: var(--verde);
+  color: var(--crema);
+  font-weight: 700;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 10;
+}
+.aviso-flotante.visible { opacity: 1; transform: translate(-50%, 0); }
+
+/* Si la persona pidió menos animaciones en su sistema, las quitamos */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+
+/* ---------------------------------------------------------------------
+   10. CELULARES (pantallas de menos de 600 px)
+   --------------------------------------------------------------------- */
+@media (max-width: 600px) {
+  .marca__logo { width: 56px; height: 56px; }
+  .cabecera__contenido .boton { width: 100%; }
+  .buscador__filtro { flex: 1 1 45%; }
+  .campo-doble { grid-template-columns: 1fr; }
+  .ventana { padding: 24px 18px 20px; }
+}
