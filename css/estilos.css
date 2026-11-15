@@ -12,6 +12,7 @@
      8. Ventanas (detalle y formulario)
      9. Pie de página y avisos
     10. Celulares
+    11. Ajustes para Safari (Mac y iPhone)
    ===================================================================== */
 
 
@@ -245,6 +246,7 @@ a { color: var(--marino); }
   color: var(--verde);
 }
 .etiqueta--activo { background: #FBE6D3; color: var(--naranja-osc); }
+.etiqueta--semiactivo { background: #F3E9CF; color: var(--cuerda-osc); }
 .etiqueta--pasivo { background: #E3E7F2; color: var(--marino); }
 
 /* Mensaje cuando no hay juegos, hay un error o está cargando */
@@ -334,8 +336,9 @@ a { color: var(--marino); }
   border: none;
   border-radius: 50%;
   background: transparent;
-  font-size: 1.6rem;
-  line-height: 1;
+  display: grid;
+  place-items: center;
+  padding: 0;
   color: var(--tinta-suave);
   cursor: pointer;
 }
@@ -371,6 +374,10 @@ a { color: var(--marino); }
 }
 .detalle__bloque p { margin: 0; white-space: pre-wrap; }
 .detalle__autor { color: var(--tinta-suave); font-size: 0.9rem; margin: 0; }
+.detalle__materiales { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
+.detalle__materiales th { text-align: left; font-size: 0.8rem; color: var(--tinta-suave); font-weight: 700; padding: 0 0 4px; }
+.detalle__materiales td { padding: 6px 0; border-top: 1px solid var(--linea); }
+.detalle__materiales td:last-child, .detalle__materiales th:last-child { text-align: right; padding-left: 12px; white-space: nowrap; }
 
 /* Campos del formulario */
 .campo { margin-bottom: 14px; border: none; padding: 0; min-width: 0; }
@@ -386,6 +393,8 @@ a { color: var(--marino); }
   color: var(--tinta);
 }
 .campo textarea { resize: vertical; }
+.campo__ayuda { margin: 0 0 8px; font-size: 0.85rem; font-weight: 400; color: var(--tinta-suave); }
+legend .campo__ayuda { display: inline; margin: 0 0 0 4px; }
 .campo input:focus, .campo textarea:focus, .campo select:focus { border-color: var(--naranja); outline: none; }
 .campo-doble { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
 
@@ -409,6 +418,64 @@ a { color: var(--marino); }
 .opciones input:checked + span { background: var(--marino); border-color: var(--marino); color: #fff; }
 .opciones input:focus-visible + span { outline: 3px solid var(--naranja); outline-offset: 2px; }
 .opciones.invalido span { border-color: var(--riesgo-alto); }
+
+/* Ramas: la casilla queda visible dentro del botón para que se lea como lista de verificación */
+.opciones--casillas input {
+  position: static;
+  opacity: 1;
+  pointer-events: auto;
+  width: 17px; height: 17px;
+  margin: 0;
+  accent-color: var(--marino);
+}
+.opciones--casillas label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px 7px 12px;
+  border: 2px solid var(--linea);
+  border-radius: 999px;
+  background: #fff;
+}
+.opciones--casillas span { padding: 0; border: none; background: none; }
+.opciones--casillas label:has(input:checked) { border-color: var(--marino); background: #E3E7F2; }
+.opciones--casillas input:checked + span { background: none; color: var(--marino); }
+.opciones--casillas.invalido label { border-color: var(--riesgo-alto); }
+
+/* Materiales: dos columnas (material y cantidad) y el botón para quitar */
+.materiales__encabezado,
+.material {
+  display: grid;
+  grid-template-columns: 1fr 120px 72px;
+  gap: 8px;
+  align-items: center;
+}
+.materiales__encabezado { font-size: 0.85rem; font-weight: 700; color: var(--tinta-suave); margin-bottom: 4px; }
+.materiales { display: flex; flex-direction: column; gap: 8px; }
+.boton-quitar {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--riesgo-alto);
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 7px 6px;
+  cursor: pointer;
+}
+.boton-quitar:hover { border-color: #F0CFC6; }
+.boton-texto {
+  margin-top: 10px;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--marino);
+  background: transparent;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+}
+.boton-texto:hover { text-decoration: underline; }
 
 /* Campo trampa para robots: fuera de la pantalla */
 .trampa { position: absolute; left: -9999px; }
@@ -471,5 +538,48 @@ a { color: var(--marino); }
   .cabecera__contenido .boton { width: 100%; }
   .buscador__filtro { flex: 1 1 45%; }
   .campo-doble { grid-template-columns: 1fr; }
+  .materiales__encabezado, .material { grid-template-columns: 1fr 84px 60px; }
   .ventana { padding: 24px 18px 20px; }
 }
+
+
+/* ---------------------------------------------------------------------
+   11. AJUSTES PARA SAFARI (MAC Y IPHONE)
+   Safari agrega sus propios íconos y estilos a algunos campos. Aquí los
+   quitamos para que la página se vea igual en todos los navegadores.
+   --------------------------------------------------------------------- */
+
+/* El buscador: sin lupa ni "x" propias del navegador */
+input[type="search"] { -webkit-appearance: none; appearance: none; }
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button { -webkit-appearance: none; display: none; }
+
+/* Íconos de autollenado (contactos, llaves) que Safari mete en los campos */
+input::-webkit-contacts-auto-fill-button,
+input::-webkit-credentials-auto-fill-button,
+input::-webkit-strong-password-auto-fill-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}
+
+/* Flecha de la lista de países (datalist) */
+input::-webkit-calendar-picker-indicator { display: none !important; }
+
+/* Listas desplegables: misma apariencia en todos los navegadores,
+   con una flecha dibujada en el CSS (no depende de ninguna letra) */
+.buscador select,
+.campo select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%235A4F2E' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+/* Letras más nítidas en Mac */
+body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }

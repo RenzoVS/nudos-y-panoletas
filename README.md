@@ -1,6 +1,6 @@
 # Nudos y Pañoletas
 
-Foro de juegos para reuniones scout. Los dirigentes publican juegos y otros los encuentran filtrando por rama, nivel de riesgo, tipo y si son aplicativos.
+Foro de juegos para reuniones scout. Los dirigentes publican juegos y otros los encuentran filtrando por rama, nivel de riesgo, tipo (activo, semiactivo o pasivo) y si son aplicativos.
 
 ## Qué hay en cada archivo
 
@@ -10,7 +10,8 @@ Foro de juegos para reuniones scout. Los dirigentes publican juegos y otros los 
 | `css/estilos.css` | Colores, letras y diseño. Los colores de la marca están al inicio. |
 | `js/config.js` | Los datos de conexión con Supabase (URL y publishable key). |
 | `js/app.js` | La lógica: cargar, filtrar, mostrar y publicar juegos. |
-| `supabase/esquema.sql` | La tabla de juegos y las reglas de seguridad de la base de datos. |
+| `supabase/esquema.sql` | La tabla de juegos y las reglas de seguridad de la base de datos (versión actual). |
+| `supabase/migraciones/` | Cada cambio que se le hizo a la base de datos, con su fecha. |
 | `img/` | Logo y favicon. |
 
 Cada archivo tiene comentarios que explican qué hace cada parte.
@@ -49,7 +50,8 @@ Edita un archivo en GitHub (ícono de lápiz) y guarda con **Commit changes**. V
 
 - **Cambiar colores:** `css/estilos.css`, sección 1.
 - **Cambiar textos de la cabecera o el pie:** `index.html`.
-- **Agregar una rama:** en tres lugares: `supabase/esquema.sql` (la regla `rama in (...)`), `js/app.js` (la lista `RAMAS`) e `index.html` (el filtro y el formulario). La base de datos también debe actualizarse.
+- **Agregar una rama:** en tres lugares: `supabase/esquema.sql` (la lista de la columna `ramas`), `js/app.js` (la lista `RAMAS`) e `index.html` (el filtro y las casillas del formulario). La base de datos también debe actualizarse.
+- **Cómo se guardan los materiales:** como una lista `[{"material": "Conos", "cantidad": "4"}]`. Una lista vacía significa que el juego no necesita materiales.
 - **Agregar un campo al formulario:** primero una columna nueva en Supabase, luego el campo en `index.html` y por último el dato en el objeto `juego` dentro de `js/app.js` (sección 9).
 
 ## Seguridad

@@ -19,18 +19,18 @@
 // 1. LISTAS DE OPCIONES
 // Traducen los valores guardados en la base de datos ("lobatos") a
 // textos para mostrar ("Lobatos"). Si agregas una rama, agrégala aquí,
-// en index.html (filtro y formulario) y en supabase/esquema.sql.
+// en index.html (filtro y casillas del formulario) y en supabase/esquema.sql.
+// El orden de esta lista es el orden en que se muestran las ramas.
 // ---------------------------------------------------------------------
 const RAMAS = {
   lobatos: "Lobatos",
   scouts: "Scouts",
   caminantes: "Caminantes",
   rovers: "Rovers",
-  todas: "Todas las ramas",
 };
 
 const RIESGOS = { bajo: "Riesgo bajo", medio: "Riesgo medio", alto: "Riesgo alto" };
-const TIPOS = { activo: "Activo", pasivo: "Pasivo" };
+const TIPOS = { activo: "Activo", semiactivo: "Semiactivo", pasivo: "Pasivo" };
 
 
 // ---------------------------------------------------------------------
@@ -104,6 +104,16 @@ function avisar(mensaje) {
   avisar.temporizador = setTimeout(() => aviso.classList.remove("visible"), 2500);
 }
 
+// Convierte la lista de ramas de un juego en texto para mostrar.
+// ["lobatos", "scouts"] -> "Lobatos y Scouts". Si están las cuatro -> "Todas las ramas".
+function textoRamas(ramas) {
+  const elegidas = Object.keys(RAMAS).filter((r) => (ramas || []).includes(r));
+  if (elegidas.length === Object.keys(RAMAS).length) return "Todas las ramas";
+  const nombres = elegidas.map((r) => RAMAS[r]);
+  if (nombres.length <= 1) return nombres[0] || "";
+  return nombres.slice(0, -1).join(", ") + " y " + nombres[nombres.length - 1];
+}
+
 // Crea el "parche" de color que indica el nivel de riesgo.
 function crearParche(riesgo) {
   return crear("span", `parche parche--${riesgo}`, RIESGOS[riesgo]);
@@ -141,7 +151,7 @@ async function cargarJuegos() {
 
   const { data, error } = await db
     .from("juegos")
-    .select("id, creado_en, titulo, descripcion, materiales, rama, riesgo, tipo, cantidad, aplicativo, tipo_instruccion, autor, grupo_scout, pais")
+    .select("id, creado_en, titulo, descripcion, materiales, ramas, riesgo, tipo, cantidad, aplicativo, tipo_instruccion, autor, grupo_scout, pais")
     .eq("estado", "aprobado")
     .order("creado_en", { ascending: false })
     .limit(500); // límite de seguridad; cuando haya más juegos, se puede paginar
@@ -170,16 +180,17 @@ function juegosFiltrados() {
   const busqueda = normalizar(f.texto);
 
   return estado.juegos.filter((juego) => {
-    // Un juego "para todas las ramas" aparece al filtrar cualquier rama.
-    if (f.rama && juego.rama !== f.rama && juego.rama !== "todas") return false;
+    // Un juego puede servir para varias ramas: basta con que incluya la elegida.
+    if (f.rama && !juego.ramas.includes(f.rama)) return false;
     if (f.riesgo && juego.riesgo !== f.riesgo) return false;
     if (f.tipo && juego.tipo !== f.tipo) return false;
     if (f.soloAplicativos && !juego.aplicativo) return false;
 
     if (busqueda) {
-      // Buscamos en el título, la descripción, los materiales y la instrucción.
+      // Buscamos en el título, la descripción, los nombres de los materiales y la instrucción.
+      const nombresMateriales = (juego.materiales || []).map((m) => m.material).join(" ");
       const textoDelJuego = normalizar(
-        [juego.titulo, juego.descripcion, juego.materiales, juego.tipo_instruccion].join(" ")
+        [juego.titulo, juego.descripcion, nombresMateriales, juego.tipo_instruccion].join(" ")
       );
       if (!textoDelJuego.includes(busqueda)) return false;
     }
@@ -247,7 +258,7 @@ function crearFicha(juego) {
   ficha.type = "button";
 
   const cabeza = crear("div", "ficha__cabeza");
-  cabeza.append(crear("span", "ficha__rama", RAMAS[juego.rama]), crearParche(juego.riesgo));
+  cabeza.append(crear("span", "ficha__rama", textoRamas(juego.ramas)), crearParche(juego.riesgo));
 
   ficha.append(
     cabeza,
@@ -337,7 +348,7 @@ function abrirDetalle(juego) {
 
   const datos = crear("div", "detalle__datos");
   datos.append(
-    crear("span", "etiqueta", RAMAS[juego.rama]),
+    crear("span", "etiqueta", textoRamas(juego.ramas)),
     crearParche(juego.riesgo),
     ...crearEtiquetas(juego).children
   );
@@ -349,7 +360,26 @@ function abrirDetalle(juego) {
     return b;
   };
 
-  // "Compartido por Halcón Sereno · Grupo 52 · Perú" (solo lo que hayan llenado)
+  // Materiales: una tabla de dos columnas (material y cantidad).
+  const bloqueMateriales = crear("div", "detalle__bloque");
+  bloqueMateriales.append(crear("h3", null, "Materiales"));
+  const materiales = juego.materiales || [];
+  if (materiales.length === 0) {
+    bloqueMateriales.append(crear("p", null, "No necesita materiales."));
+  } else {
+    const tabla = crear("table", "detalle__materiales");
+    const cabecera = crear("tr");
+    cabecera.append(crear("th", null, "Material"), crear("th", null, "Cantidad"));
+    tabla.append(cabecera);
+    materiales.forEach((m) => {
+      const fila = crear("tr");
+      fila.append(crear("td", null, m.material), crear("td", null, m.cantidad));
+      tabla.append(fila);
+    });
+    bloqueMateriales.append(tabla);
+  }
+
+  // "Compartido por Halcón Sereno, Grupo 52, Perú" (solo lo que hayan llenado)
   const partesAutor = [juego.autor, juego.grupo_scout, juego.pais].filter(Boolean);
   const autor = crear(
     "p",
@@ -367,7 +397,7 @@ function abrirDetalle(juego) {
     titulo,
     datos,
     bloque("En qué consiste", juego.descripcion),
-    bloque("Materiales", juego.materiales),
+    bloqueMateriales,
     autor,
     acciones
   );
@@ -409,6 +439,98 @@ function abrirFormulario() {
   ventanaPublicar.showModal();
 }
 
+// --- Materiales ------------------------------------------------------
+// Cada fila tiene dos campos (material y cantidad) y un botón "Quitar".
+// Se guardan en la base de datos como una lista:
+//   [{ "material": "Conos", "cantidad": "4" }, ...]
+const listaMateriales = $("#lista-materiales");
+
+// Crea una fila nueva y devuelve el campo "material" para poder enfocarlo.
+function agregarFilaMaterial() {
+  const fila = crear("div", "material");
+
+  const campoMaterial = document.createElement("input");
+  campoMaterial.type = "text";
+  campoMaterial.className = "material__nombre";
+  campoMaterial.maxLength = 80;   // mismo límite que en supabase/esquema.sql
+  campoMaterial.placeholder = "Ej: conos";
+  campoMaterial.autocomplete = "off";
+
+  const campoCantidad = document.createElement("input");
+  campoCantidad.type = "text";
+  campoCantidad.className = "material__cantidad";
+  campoCantidad.maxLength = 30;
+  campoCantidad.placeholder = "Ej: 4";
+  campoCantidad.autocomplete = "off";
+
+  const botonQuitar = crear("button", "boton-quitar", "Quitar");
+  botonQuitar.type = "button";
+  botonQuitar.addEventListener("click", () => {
+    if (listaMateriales.children.length === 1) {
+      // Si es la única fila, la vaciamos en vez de borrarla.
+      campoMaterial.value = "";
+      campoCantidad.value = "";
+      campoMaterial.focus();
+    } else {
+      fila.remove();
+      numerarMateriales();
+      listaMateriales.lastElementChild.querySelector(".material__nombre").focus();
+    }
+  });
+
+  fila.append(campoMaterial, campoCantidad, botonQuitar);
+  listaMateriales.append(fila);
+  numerarMateriales();
+  return campoMaterial;
+}
+
+// Pone etiquetas numeradas ("Material 2") para los lectores de pantalla.
+function numerarMateriales() {
+  [...listaMateriales.children].forEach((fila, i) => {
+    const n = i + 1;
+    fila.querySelector(".material__nombre").setAttribute("aria-label", `Material ${n}`);
+    fila.querySelector(".material__cantidad").setAttribute("aria-label", `Cantidad del material ${n}`);
+    fila.querySelector(".boton-quitar").setAttribute("aria-label", `Quitar material ${n}`);
+  });
+}
+
+// Botón "Agregar otro material": si la última fila está vacía, la usamos.
+$("#btn-agregar-material").addEventListener("click", () => {
+  const ultima = listaMateriales.lastElementChild;
+  const ultimoNombre = ultima && ultima.querySelector(".material__nombre");
+  if (ultimoNombre && !ultimoNombre.value.trim()) {
+    ultimoNombre.focus();
+  } else {
+    agregarFilaMaterial().focus();
+  }
+});
+
+// Lee las filas. Las filas vacías se ignoran. Si una fila tiene solo uno
+// de los dos datos, se marca en rojo y "valido" queda en false.
+function leerMateriales() {
+  const lista = [];
+  let valido = true;
+  [...listaMateriales.children].forEach((fila) => {
+    const campoMaterial = fila.querySelector(".material__nombre");
+    const campoCantidad = fila.querySelector(".material__cantidad");
+    const material = campoMaterial.value.trim();
+    const cantidad = campoCantidad.value.trim();
+    if (!material && !cantidad) return;                       // fila vacía
+    if (!material) { campoMaterial.classList.add("invalido"); valido = false; return; }
+    if (!cantidad) { campoCantidad.classList.add("invalido"); valido = false; return; }
+    lista.push({ material, cantidad });
+  });
+  return { lista, valido };
+}
+
+// Deja una sola fila vacía (al abrir la página y al limpiar el formulario).
+function reiniciarMateriales() {
+  listaMateriales.replaceChildren();
+  agregarFilaMaterial();
+}
+
+// --- Resto del formulario ---------------------------------------------
+
 // Mostrar u ocultar el campo de instrucción según la casilla "aplicativo".
 $("#f-aplicativo").addEventListener("change", (e) => {
   $("#campo-instruccion").hidden = !e.target.checked;
@@ -427,13 +549,16 @@ function validarFormulario() {
     }
   });
 
-  // Grupos de opciones (riesgo y tipo): debe haber una marcada
+  // Grupos de opciones (ramas, riesgo y tipo): debe haber al menos una marcada
   formulario.querySelectorAll(".opciones").forEach((grupo) => {
     if (!grupo.querySelector("input:checked")) {
       grupo.classList.add("invalido");
       valido = false;
     }
   });
+
+  // Materiales: cada fila llena debe tener material y cantidad
+  if (!leerMateriales().valido) valido = false;
 
   // Si es aplicativo, la instrucción es obligatoria
   const instruccion = $("#f-instruccion");
@@ -481,8 +606,8 @@ formulario.addEventListener("submit", async (evento) => {
   const juego = {
     titulo: datos.get("titulo").trim(),
     descripcion: datos.get("descripcion").trim(),
-    materiales: datos.get("materiales").trim(),
-    rama: datos.get("rama"),
+    materiales: leerMateriales().lista,
+    ramas: datos.getAll("ramas"),       // todas las casillas marcadas
     riesgo: datos.get("riesgo"),
     tipo: datos.get("tipo"),
     cantidad: datos.get("cantidad").trim(),
@@ -539,6 +664,7 @@ ventanaPublicar.addEventListener("close", () => {
   if (gracias) {
     gracias.remove();
     formulario.reset();
+    reiniciarMateriales();
     $("#campo-instruccion").hidden = true;
   }
   formulario.hidden = false;
@@ -576,6 +702,7 @@ $("#ventana-juego").addEventListener("close", () => {
 
 $("#btn-publicar").addEventListener("click", abrirFormulario);
 
+reiniciarMateriales(); // primera fila de materiales del formulario
 prepararFiltros();
 dibujarLista();  // muestra "Cargando…"
 cargarJuegos();  // trae los juegos y vuelve a dibujar

@@ -10,6 +10,35 @@
 
 
 -- ---------------------------------------------------------------------
+-- 0. FUNCIÓN QUE REVISA LA LISTA DE MATERIALES
+-- ---------------------------------------------------------------------
+-- Los materiales se guardan como una lista (formato JSON):
+--   [{"material": "Conos", "cantidad": "4"}, {"material": "Soga", "cantidad": "1 de 5 m"}]
+-- Esta función devuelve "true" solo si la lista tiene ese formato:
+-- máximo 30 materiales, cada uno con material (1 a 80 letras) y
+-- cantidad (1 a 30 letras), y nada más.
+create or replace function public.materiales_validos(m jsonb)
+returns boolean
+language sql
+immutable
+set search_path = ''
+as $$
+  select jsonb_typeof(m) = 'array'
+     and jsonb_array_length(m) <= 30
+     and not exists (
+       select 1
+       from jsonb_array_elements(m) as e
+       where jsonb_typeof(e) <> 'object'
+          or coalesce(jsonb_typeof(e -> 'material'), '') <> 'string'
+          or coalesce(jsonb_typeof(e -> 'cantidad'), '') <> 'string'
+          or char_length(trim(e ->> 'material')) not between 1 and 80
+          or char_length(trim(e ->> 'cantidad')) not between 1 and 30
+          or (select count(*) from jsonb_object_keys(e)) <> 2
+     )
+$$;
+
+
+-- ---------------------------------------------------------------------
 -- 1. TABLA "juegos"
 -- ---------------------------------------------------------------------
 -- Cada fila es un juego publicado por un dirigente.
@@ -25,14 +54,21 @@ create table if not exists public.juegos (
   -- Datos del juego (los campos que pide el formulario).
   titulo          text not null check (char_length(titulo) between 3 and 120),
   descripcion     text not null check (char_length(descripcion) between 10 and 5000),
-  materiales      text not null check (char_length(materiales) between 1 and 1000),
 
-  -- Para qué rama es. Si agregas una rama nueva, cámbiala aquí
-  -- y también en la lista RAMAS de js/app.js.
-  rama            text not null check (rama in ('lobatos', 'scouts', 'caminantes', 'rovers', 'todas')),
+  -- Lista de materiales con su cantidad (ver la función de arriba).
+  -- Una lista vacía significa que el juego no necesita materiales.
+  materiales      jsonb not null default '[]'::jsonb
+                  check (public.materiales_validos(materiales)),
+
+  -- Para qué ramas sirve: una lista con al menos una rama, y solo
+  -- ramas de estas cuatro. Si agregas una rama nueva, cámbiala
+  -- aquí y también en la lista RAMAS de js/app.js.
+  ramas           text[] not null
+                  check (cardinality(ramas) between 1 and 4
+                         and ramas <@ array['lobatos', 'scouts', 'caminantes', 'rovers']::text[]),
 
   riesgo          text not null check (riesgo in ('bajo', 'medio', 'alto')),
-  tipo            text not null check (tipo in ('activo', 'pasivo')),
+  tipo            text not null check (tipo in ('activo', 'semiactivo', 'pasivo')),
   cantidad        text not null check (char_length(cantidad) between 1 and 60),
 
   -- Juego aplicativo: si es "true", hay que indicar la instrucción

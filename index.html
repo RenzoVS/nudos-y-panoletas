@@ -9,9 +9,9 @@
   <meta name="description" content="Juegos para reuniones scout, compartidos por dirigentes. Busca por rama, nivel de riesgo y cantidad de scouts, o publica el tuyo.">
   <meta property="og:title" content="Nudos y Pañoletas">
   <meta property="og:description" content="Juegos para reuniones scout, compartidos por dirigentes.">
-  <!-- Cuando tengas la dirección final, cambia esta ruta por la completa,
-       por ejemplo: https://nudosypanoletas.vercel.app/img/logo.jpg -->
-  <meta property="og:image" content="img/logo.jpg">
+  <!-- La imagen que muestran WhatsApp e Instagram al compartir el enlace.
+       Debe ser la dirección completa. Si cambias de dominio, cámbiala aquí. -->
+  <meta property="og:image" content="https://nudos-y-panoletas.vercel.app/img/logo.jpg">
 
   <link rel="icon" type="image/png" href="img/favicon.png">
 
@@ -80,8 +80,9 @@
       <label class="buscador__filtro">
         <span class="solo-lectores">Tipo de juego</span>
         <select id="filtro-tipo">
-          <option value="">Activos y pasivos</option>
+          <option value="">Todos los tipos</option>
           <option value="activo">Activos</option>
+          <option value="semiactivo">Semiactivos</option>
           <option value="pasivo">Pasivos</option>
         </select>
       </label>
@@ -113,7 +114,7 @@
        El contenido lo llena app.js (sección 8).
        ============================================================ -->
   <dialog class="ventana" id="ventana-juego" aria-labelledby="detalle-titulo">
-    <button type="button" class="ventana__cerrar" data-cerrar aria-label="Cerrar">×</button>
+    <button type="button" class="ventana__cerrar" data-cerrar aria-label="Cerrar"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
     <div id="detalle"></div>
   </dialog>
 
@@ -125,15 +126,15 @@
        los límites del archivo supabase/esquema.sql.
        ============================================================ -->
   <dialog class="ventana" id="ventana-publicar" aria-labelledby="publicar-titulo">
-    <button type="button" class="ventana__cerrar" data-cerrar aria-label="Cerrar">×</button>
+    <button type="button" class="ventana__cerrar" data-cerrar aria-label="Cerrar"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
 
-    <form id="formulario" novalidate>
+    <form id="formulario" novalidate autocomplete="off">
       <h2 class="ventana__titulo" id="publicar-titulo">Publicar un juego</h2>
       <p class="ventana__nota">Antes de aparecer en la página, revisamos cada juego. Suele tomar uno o dos días.</p>
 
       <div class="campo">
         <label for="f-titulo">Nombre del juego</label>
-        <input id="f-titulo" name="titulo" type="text" required minlength="3" maxlength="120" placeholder="Ej: La isla del tesoro">
+        <input id="f-titulo" name="titulo" type="text" autocomplete="off" required minlength="3" maxlength="120" placeholder="Ej: La isla del tesoro">
       </div>
 
       <div class="campo">
@@ -141,30 +142,34 @@
         <textarea id="f-descripcion" name="descripcion" required minlength="10" maxlength="5000" rows="5" placeholder="Explica la dinámica y las reglas para que otro dirigente pueda hacerlo"></textarea>
       </div>
 
+      <!-- Materiales: cada fila tiene "material" y "cantidad".
+           Las filas las crea js/app.js (sección 9, "Materiales").
+           Si el juego no necesita materiales, se deja la lista vacía. -->
+      <fieldset class="campo" id="campo-materiales">
+        <legend>Materiales</legend>
+        <p class="campo__ayuda">Escribe cada material con su cantidad. Si el juego no necesita materiales, deja la fila en blanco.</p>
+        <div class="materiales__encabezado" aria-hidden="true">
+          <span>Material</span><span>Cantidad</span>
+        </div>
+        <div class="materiales" id="lista-materiales"></div>
+        <button type="button" class="boton-texto" id="btn-agregar-material">+ Agregar otro material</button>
+      </fieldset>
+
+      <!-- Ramas: casillas, se pueden marcar varias -->
+      <fieldset class="campo opciones opciones--casillas" id="campo-ramas">
+        <legend>¿Para qué ramas sirve? <span class="campo__ayuda">Puedes marcar varias.</span></legend>
+        <label><input type="checkbox" name="ramas" value="lobatos"><span>Lobatos</span></label>
+        <label><input type="checkbox" name="ramas" value="scouts"><span>Scouts</span></label>
+        <label><input type="checkbox" name="ramas" value="caminantes"><span>Caminantes</span></label>
+        <label><input type="checkbox" name="ramas" value="rovers"><span>Rovers</span></label>
+      </fieldset>
+
       <div class="campo">
-        <label for="f-materiales">Materiales</label>
-        <textarea id="f-materiales" name="materiales" required maxlength="1000" rows="2" placeholder="Ej: pañoletas, conos, una soga de 5 metros. Si no necesita nada, escribe: ninguno"></textarea>
+        <label for="f-cantidad">¿Para cuántos scouts?</label>
+        <input id="f-cantidad" name="cantidad" type="text" autocomplete="off" required maxlength="60" placeholder="Ej: de 10 a 20">
       </div>
 
-      <div class="campo-doble">
-        <div class="campo">
-          <label for="f-rama">Rama</label>
-          <select id="f-rama" name="rama" required>
-            <option value="">Elige una rama</option>
-            <option value="lobatos">Lobatos</option>
-            <option value="scouts">Scouts</option>
-            <option value="caminantes">Caminantes</option>
-            <option value="rovers">Rovers</option>
-            <option value="todas">Sirve para todas</option>
-          </select>
-        </div>
-        <div class="campo">
-          <label for="f-cantidad">¿Para cuántos scouts?</label>
-          <input id="f-cantidad" name="cantidad" type="text" required maxlength="60" placeholder="Ej: de 10 a 20">
-        </div>
-      </div>
-
-      <!-- Grupos de botones de opción (radio): se ven como botones en el CSS -->
+      <!-- Grupos de opción única (radio): se ven como botones en el CSS -->
       <fieldset class="campo opciones">
         <legend>Nivel de riesgo</legend>
         <label><input type="radio" name="riesgo" value="bajo" required><span>Bajo</span></label>
@@ -175,6 +180,7 @@
       <fieldset class="campo opciones">
         <legend>Tipo de juego</legend>
         <label><input type="radio" name="tipo" value="activo" required><span>Activo</span></label>
+        <label><input type="radio" name="tipo" value="semiactivo"><span>Semiactivo</span></label>
         <label><input type="radio" name="tipo" value="pasivo"><span>Pasivo</span></label>
       </fieldset>
 
@@ -193,11 +199,11 @@
       <div class="campo-doble">
         <div class="campo">
           <label for="f-autor">Tu nombre o totem</label>
-          <input id="f-autor" name="autor" type="text" maxlength="80" placeholder="Ej: Halcón Sereno">
+          <input id="f-autor" name="autor" type="text" autocomplete="off" maxlength="80" placeholder="Ej: Halcón Sereno">
         </div>
         <div class="campo">
           <label for="f-pais">País</label>
-          <input id="f-pais" name="pais" type="text" maxlength="60" list="paises" placeholder="Ej: Perú">
+          <input id="f-pais" name="pais" type="text" autocomplete="off" maxlength="60" list="paises" placeholder="Ej: Perú">
           <datalist id="paises">
             <option value="Argentina"><option value="Bolivia"><option value="Chile"><option value="Colombia">
             <option value="Costa Rica"><option value="Ecuador"><option value="España"><option value="Guatemala">
@@ -207,7 +213,7 @@
       </div>
       <div class="campo">
         <label for="f-grupo">Grupo scout</label>
-        <input id="f-grupo" name="grupo_scout" type="text" maxlength="120" placeholder="Ej: Grupo 52 Santa Rosa">
+        <input id="f-grupo" name="grupo_scout" type="text" autocomplete="off" maxlength="120" placeholder="Ej: Grupo 52 Santa Rosa">
       </div>
 
       <!-- Trampa para robots: las personas no ven este campo; si llega lleno, es spam -->
