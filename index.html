@@ -147,7 +147,7 @@
            Si el juego no necesita materiales, se deja la lista vacía. -->
       <fieldset class="campo" id="campo-materiales">
         <legend>Materiales</legend>
-        <p class="campo__ayuda">Escribe cada material con su cantidad. Si el juego no necesita materiales, deja la fila en blanco.</p>
+        <p class="campo__ayuda">Usa una fila por cada material (por ejemplo, "Pelota" en una fila y "Conos" en otra). Si el juego no necesita materiales, deja la fila en blanco.</p>
         <div class="materiales__encabezado" aria-hidden="true">
           <span>Material</span><span>Cantidad</span>
         </div>
@@ -192,7 +192,14 @@
       <!-- Solo se muestra si marcan "aplicativo" (lo controla app.js) -->
       <div class="campo" id="campo-instruccion" hidden>
         <label for="f-instruccion">¿Qué instrucción practica?</label>
-        <input id="f-instruccion" name="tipo_instruccion" type="text" maxlength="120" placeholder="Ej: nudos, orientación, primeros auxilios">
+        <!-- Sugerencias al escribir. Se puede escribir otra instrucción. -->
+        <input id="f-instruccion" name="tipo_instruccion" type="text" maxlength="120" list="instrucciones" autocomplete="off" placeholder="Escribe o elige: nudos, orientación…">
+        <datalist id="instrucciones">
+          <option value="Nudos"><option value="Cabuyería"><option value="Orientación"><option value="Topografía">
+          <option value="Primeros auxilios"><option value="Campismo"><option value="Señales"><option value="Morse">
+          <option value="Fuego"><option value="Cocina"><option value="Naturaleza"><option value="Observación">
+          <option value="Rastreo"><option value="Expresión"><option value="Liderazgo"><option value="Trabajo en equipo">
+        </datalist>
       </div>
 
       <h3 class="ventana__subtitulo">Sobre ti <span>(opcional)</span></h3>
@@ -203,12 +210,27 @@
         </div>
         <div class="campo">
           <label for="f-pais">País</label>
-          <input id="f-pais" name="pais" type="text" autocomplete="off" maxlength="60" list="paises" placeholder="Ej: Perú">
-          <datalist id="paises">
-            <option value="Argentina"><option value="Bolivia"><option value="Chile"><option value="Colombia">
-            <option value="Costa Rica"><option value="Ecuador"><option value="España"><option value="Guatemala">
-            <option value="México"><option value="Paraguay"><option value="Perú"><option value="Uruguay"><option value="Venezuela">
-          </datalist>
+          <!-- Lista cerrada para que todos escriban el país igual.
+               Si agregas un país aquí, agrégalo también en la función
+               "normalizar_pais" (supabase/migraciones/2026-11-25_limpieza_automatica.sql). -->
+          <select id="f-pais" name="pais">
+            <option value="">Elige tu país</option>
+            <option>Argentina</option><option>Bolivia</option><option>Brasil</option>
+            <option>Chile</option><option>Colombia</option><option>Costa Rica</option>
+            <option>Cuba</option><option>Ecuador</option><option>El Salvador</option>
+            <option>España</option><option>Estados Unidos</option><option>Guatemala</option>
+            <option>Honduras</option><option>México</option><option>Nicaragua</option>
+            <option>Panamá</option><option>Paraguay</option><option>Perú</option>
+            <option>Puerto Rico</option><option>República Dominicana</option><option>Uruguay</option>
+            <option>Venezuela</option>
+            <optgroup label="Otros países">
+              <option>Alemania</option><option>Andorra</option><option>Australia</option>
+              <option>Canadá</option><option>Filipinas</option><option>Francia</option>
+              <option>Guinea Ecuatorial</option><option>Italia</option><option>Japón</option>
+              <option>Portugal</option><option>Reino Unido</option><option>Suiza</option>
+              <option value="Otro">Otro país</option>
+            </optgroup>
+          </select>
         </div>
       </div>
       <div class="campo">

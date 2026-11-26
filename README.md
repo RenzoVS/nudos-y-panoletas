@@ -43,14 +43,20 @@ Edita un archivo en GitHub (ícono de lápiz) y guarda con **Commit changes**. V
 ## Moderar juegos
 
 1. Entra a Supabase > tu proyecto > **Table Editor** > tabla `juegos`.
-2. Busca los que tienen `estado` = `pendiente`.
-3. Cambia el estado a `aprobado` para publicarlo, o a `rechazado` para descartarlo.
+2. Busca los que tienen `estado` = `pendiente` (botón **Filter**: `estado` equals `pendiente`).
+3. Cambia el estado a `aprobado` para publicarlo, o a `rechazado` para descartarlo. Escríbelo en minúsculas y sin tilde.
+4. Recarga la página: los aprobados aparecen al instante.
+
+No hace falta corregir mayúsculas, tildes ni espacios: la base de datos lo hace sola al guardar
+(por ejemplo, "peru" se guarda como "Perú" y "topografia" como "Topografía"). Si ves materiales
+juntos en una sola fila ("papel y lápiz"), sepáralos en filas distintas.
 
 ## Cambios frecuentes
 
 - **Cambiar colores:** `css/estilos.css`, sección 1.
 - **Cambiar textos de la cabecera o el pie:** `index.html`.
 - **Agregar una rama:** en tres lugares: `supabase/esquema.sql` (la lista de la columna `ramas`), `js/app.js` (la lista `RAMAS`) e `index.html` (el filtro y las casillas del formulario). La base de datos también debe actualizarse.
+- **Agregar un país a la lista:** en dos lugares: el menú "País" de `index.html` y la función `normalizar_pais` en Supabase (ver `supabase/esquema.sql`, sección 3). Lo mismo para las instrucciones sugeridas (`normalizar_instruccion` y la lista `instrucciones` de `index.html`).
 - **Cómo se guardan los materiales:** como una lista `[{"material": "Conos", "cantidad": "4"}]`. Una lista vacía significa que el juego no necesita materiales.
 - **Agregar un campo al formulario:** primero una columna nueva en Supabase, luego el campo en `index.html` y por último el dato en el objeto `juego` dentro de `js/app.js` (sección 9).
 

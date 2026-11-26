@@ -566,7 +566,7 @@ input::-webkit-strong-password-auto-fill-button {
   right: 0;
 }
 
-/* Flecha de la lista de países (datalist) */
+/* Flecha de las listas de sugerencias (datalist, como "Instrucción") */
 input::-webkit-calendar-picker-indicator { display: none !important; }
 
 /* Listas desplegables: misma apariencia en todos los navegadores,
