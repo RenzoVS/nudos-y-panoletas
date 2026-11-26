@@ -87,6 +87,11 @@
         </select>
       </label>
 
+      <label class="buscador__filtro buscador__numero">
+        <span class="solo-lectores">¿Cuántos scouts tienes?</span>
+        <input type="number" id="filtro-cantidad" inputmode="numeric" min="1" max="300" step="1" placeholder="¿Cuántos scouts tienes?">
+      </label>
+
       <label class="casilla">
         <input type="checkbox" id="filtro-aplicativo">
         <span>Solo aplicativos</span>
@@ -164,10 +169,24 @@
         <label><input type="checkbox" name="ramas" value="rovers"><span>Rovers</span></label>
       </fieldset>
 
-      <div class="campo">
-        <label for="f-cantidad">¿Para cuántos scouts?</label>
-        <input id="f-cantidad" name="cantidad" type="text" autocomplete="off" required maxlength="60" placeholder="Ej: de 10 a 20">
-      </div>
+      <!-- Cantidad de scouts: dos números. Los límites (1 a 300) son los
+           mismos que en supabase/esquema.sql. El máximo es opcional. -->
+      <fieldset class="campo" id="campo-cantidad">
+        <legend>¿Para cuántos scouts?</legend>
+        <p class="campo__ayuda">Si no hay límite, deja el máximo vacío.</p>
+        <div class="cantidad">
+          <label class="cantidad__parte">
+            <span>Mínimo</span>
+            <input id="f-cantidad-min" name="cantidad_min" type="number" inputmode="numeric" min="1" max="300" step="1" required placeholder="Ej: 6">
+          </label>
+          <span class="cantidad__a" aria-hidden="true">a</span>
+          <label class="cantidad__parte">
+            <span>Máximo</span>
+            <input id="f-cantidad-max" name="cantidad_max" type="number" inputmode="numeric" min="1" max="300" step="1" placeholder="Ej: 20">
+          </label>
+        </div>
+        <p class="campo__error" id="error-cantidad" hidden></p>
+      </fieldset>
 
       <!-- Grupos de opción única (radio): se ven como botones en el CSS -->
       <fieldset class="campo opciones">
@@ -235,7 +254,7 @@
       </div>
       <div class="campo">
         <label for="f-grupo">Grupo scout</label>
-        <input id="f-grupo" name="grupo_scout" type="text" autocomplete="off" maxlength="120" placeholder="Ej: Grupo 52 Santa Rosa">
+        <input id="f-grupo" name="grupo_scout" type="text" autocomplete="off" maxlength="120" placeholder="Ej: San Borja 99">
       </div>
 
       <!-- Trampa para robots: las personas no ven este campo; si llega lleno, es spam -->

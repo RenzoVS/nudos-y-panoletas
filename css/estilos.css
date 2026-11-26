@@ -490,6 +490,33 @@ legend .campo__ayuda { display: inline; margin: 0 0 0 4px; }
   font-size: 0.92rem;
 }
 
+/* Cantidad de scouts: "Mínimo [ ] a Máximo [ ]" */
+.cantidad { display: flex; align-items: flex-end; gap: 10px; }
+.cantidad__parte { flex: 1 1 0; margin: 0; }
+.cantidad__parte span { display: block; font-size: 0.85rem; font-weight: 600; color: var(--tinta-suave); margin-bottom: 4px; }
+.cantidad__a { padding-bottom: 11px; color: var(--tinta-suave); font-weight: 700; }
+.campo input[type="number"],
+.buscador input[type="number"] {
+  width: 100%;
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 9px 11px;
+  border: 2px solid var(--linea);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--tinta);
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.buscador input[type="number"] { background: var(--papel); padding: 10px 12px; }
+.campo input[type="number"]:focus { border-color: var(--naranja); outline: none; }
+.buscador input[type="number"]:focus { border-color: var(--marino); outline: none; }
+.campo input[type="number"].invalido { border-color: var(--riesgo-alto); }
+/* Sin flechitas de subir/bajar (se ven distintas en cada navegador) */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.campo__error { margin: 6px 0 0; font-size: 0.85rem; font-weight: 700; color: var(--riesgo-alto); }
+
 /* Mensaje de agradecimiento después de enviar */
 .gracias { text-align: center; padding: 18px 0 4px; }
 .gracias p { color: var(--tinta-suave); max-width: 44ch; margin: 0 auto 20px; }

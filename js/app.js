@@ -63,6 +63,7 @@ const estado = {
     rama: "",
     riesgo: "",
     tipo: "",
+    cantidad: null,      // número de scouts del grupo (null = sin filtrar)
     soloAplicativos: false,
   },
 };
@@ -119,13 +120,21 @@ function crearParche(riesgo) {
   return crear("span", `parche parche--${riesgo}`, RIESGOS[riesgo]);
 }
 
+// Convierte el mínimo y el máximo en un texto:
+//   (10, 20) -> "De 10 a 20 scouts"   (8, 8) -> "8 scouts"
+//   (5, null) -> "Desde 5 scouts"     (1, null) -> "Cualquier cantidad"
+function textoCantidad(min, max) {
+  if (max == null) return min <= 1 ? "Cualquier cantidad" : `Desde ${min} scouts`;
+  if (min === max) return `${min} scouts`;
+  return `De ${min} a ${max} scouts`;
+}
+
 // Crea las etiquetas pequeñas (tipo, cantidad, aplicativo).
 function crearEtiquetas(juego) {
   const contenedor = crear("div", "etiquetas");
   contenedor.append(
     crear("span", `etiqueta etiqueta--${juego.tipo}`, TIPOS[juego.tipo]),
-    // Si ya escribieron "scouts" en la cantidad, no lo repetimos.
-    crear("span", "etiqueta", normalizar(juego.cantidad).includes("scout") ? juego.cantidad : `${juego.cantidad} scouts`)
+    crear("span", "etiqueta", textoCantidad(juego.cantidad_min, juego.cantidad_max))
   );
   if (juego.aplicativo) {
     contenedor.append(crear("span", "etiqueta", `Aplicativo: ${juego.tipo_instruccion}`));
@@ -151,7 +160,7 @@ async function cargarJuegos() {
 
   const { data, error } = await db
     .from("juegos")
-    .select("id, creado_en, titulo, descripcion, materiales, ramas, riesgo, tipo, cantidad, aplicativo, tipo_instruccion, autor, grupo_scout, pais")
+    .select("id, creado_en, titulo, descripcion, materiales, ramas, riesgo, tipo, cantidad_min, cantidad_max, aplicativo, tipo_instruccion, autor, grupo_scout, pais")
     .eq("estado", "aprobado")
     .order("creado_en", { ascending: false })
     .limit(500); // límite de seguridad; cuando haya más juegos, se puede paginar
@@ -185,6 +194,11 @@ function juegosFiltrados() {
     if (f.riesgo && juego.riesgo !== f.riesgo) return false;
     if (f.tipo && juego.tipo !== f.tipo) return false;
     if (f.soloAplicativos && !juego.aplicativo) return false;
+    // ¿El juego sirve para un grupo de este tamaño?
+    if (f.cantidad) {
+      if (f.cantidad < juego.cantidad_min) return false;
+      if (juego.cantidad_max != null && f.cantidad > juego.cantidad_max) return false;
+    }
 
     if (busqueda) {
       // Buscamos en el título, la descripción, los nombres de los materiales y la instrucción.
@@ -216,6 +230,11 @@ function prepararFiltros() {
     estado.filtros.tipo = e.target.value;
     dibujarLista();
   });
+  $("#filtro-cantidad").addEventListener("input", (e) => {
+    const n = parseInt(e.target.value, 10);
+    estado.filtros.cantidad = n > 0 ? n : null;
+    dibujarLista();
+  });
   $("#filtro-aplicativo").addEventListener("change", (e) => {
     estado.filtros.soloAplicativos = e.target.checked;
     dibujarLista();
@@ -224,7 +243,8 @@ function prepararFiltros() {
 
 // Vuelve todos los filtros a su valor inicial.
 function limpiarFiltros() {
-  estado.filtros = { texto: "", rama: "", riesgo: "", tipo: "", soloAplicativos: false };
+  estado.filtros = { texto: "", rama: "", riesgo: "", tipo: "", cantidad: null, soloAplicativos: false };
+  $("#filtro-cantidad").value = "";
   $("#busqueda").value = "";
   $("#filtro-rama").value = "";
   $("#filtro-riesgo").value = "";
@@ -560,6 +580,9 @@ function validarFormulario() {
   // Materiales: cada fila llena debe tener material y cantidad
   if (!leerMateriales().valido) valido = false;
 
+  // Cantidad de scouts: números enteros de 1 a 300, y el máximo no menor que el mínimo
+  if (!validarCantidad()) valido = false;
+
   // Si es aplicativo, la instrucción es obligatoria
   const instruccion = $("#f-instruccion");
   if ($("#f-aplicativo").checked && !instruccion.value.trim()) {
@@ -569,6 +592,37 @@ function validarFormulario() {
 
   return valido;
 }
+
+// Lee el mínimo y el máximo. Devuelve { min, max } o null si hay un error
+// (y en ese caso marca el campo en rojo y explica qué pasa).
+function leerCantidad() {
+  const campoMin = $("#f-cantidad-min");
+  const campoMax = $("#f-cantidad-max");
+  const aviso = $("#error-cantidad");
+  aviso.hidden = true;
+
+  const esEntero = (texto) => /^\d+$/.test(texto);
+  const textoMin = campoMin.value.trim();
+  const textoMax = campoMax.value.trim();
+  const fallar = (campo, mensaje) => {
+    campo.classList.add("invalido");
+    aviso.textContent = mensaje;
+    aviso.hidden = false;
+    return null;
+  };
+
+  if (!textoMin) return fallar(campoMin, "Escribe el mínimo de scouts.");
+  if (!esEntero(textoMin) || +textoMin < 1 || +textoMin > 300) {
+    return fallar(campoMin, "El mínimo debe ser un número entero entre 1 y 300.");
+  }
+  if (!textoMax) return { min: +textoMin, max: null };
+  if (!esEntero(textoMax) || +textoMax < 1 || +textoMax > 300) {
+    return fallar(campoMax, "El máximo debe ser un número entero entre 1 y 300.");
+  }
+  if (+textoMax < +textoMin) return fallar(campoMax, "El máximo no puede ser menor que el mínimo.");
+  return { min: +textoMin, max: +textoMax };
+}
+const validarCantidad = () => leerCantidad() !== null;
 
 function mostrarErrorFormulario(mensaje) {
   const caja = $("#error-formulario");
@@ -610,7 +664,8 @@ formulario.addEventListener("submit", async (evento) => {
     ramas: datos.getAll("ramas"),       // todas las casillas marcadas
     riesgo: datos.get("riesgo"),
     tipo: datos.get("tipo"),
-    cantidad: datos.get("cantidad").trim(),
+    cantidad_min: leerCantidad().min,
+    cantidad_max: leerCantidad().max,     // null = sin máximo
     aplicativo: esAplicativo,
     tipo_instruccion: esAplicativo ? textoOpcional("tipo_instruccion") : null,
     autor: textoOpcional("autor"),

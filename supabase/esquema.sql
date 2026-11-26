@@ -69,7 +69,11 @@ create table if not exists public.juegos (
 
   riesgo          text not null check (riesgo in ('bajo', 'medio', 'alto')),
   tipo            text not null check (tipo in ('activo', 'semiactivo', 'pasivo')),
-  cantidad        text not null check (char_length(cantidad) between 1 and 60),
+  -- Para cuántos scouts: mínimo obligatorio (1 a 300) y máximo opcional
+  -- (vacío = sin máximo). La regla "juegos_cantidad_valida" de abajo
+  -- revisa que el máximo no sea menor que el mínimo.
+  cantidad_min    smallint not null,
+  cantidad_max    smallint,
 
   -- Juego aplicativo: si es "true", hay que indicar la instrucción
   -- (nudos, orientación, primeros auxilios, etc.).
@@ -87,6 +91,10 @@ create table if not exists public.juegos (
                   check (estado in ('pendiente', 'aprobado', 'rechazado')),
 
   -- Regla extra: un juego aplicativo debe decir qué instrucción aplica.
+  constraint juegos_cantidad_valida check (
+    cantidad_min between 1 and 300
+    and (cantidad_max is null or cantidad_max between cantidad_min and 300)),
+
   constraint aplicativo_requiere_instruccion
     check (not aplicativo or (tipo_instruccion is not null and char_length(trim(tipo_instruccion)) > 0))
 );
@@ -248,7 +256,6 @@ as $$
 begin
   new.titulo           := public.mayuscula_inicial(public.limpiar_texto(new.titulo));
   new.descripcion      := public.mayuscula_inicial(btrim(new.descripcion));
-  new.cantidad         := public.limpiar_texto(new.cantidad);
   new.autor            := public.limpiar_texto(new.autor);
   new.grupo_scout      := public.limpiar_texto(new.grupo_scout);
   new.pais             := public.normalizar_pais(new.pais);
