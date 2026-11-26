@@ -446,7 +446,7 @@ legend .campo__ayuda { display: inline; margin: 0 0 0 4px; }
 .materiales__encabezado,
 .material {
   display: grid;
-  grid-template-columns: 1fr 120px 72px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 64px;
   gap: 8px;
   align-items: center;
 }
@@ -565,7 +565,7 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; marg
   .cabecera__contenido .boton { width: 100%; }
   .buscador__filtro { flex: 1 1 45%; }
   .campo-doble { grid-template-columns: 1fr; }
-  .materiales__encabezado, .material { grid-template-columns: 1fr 84px 60px; }
+  .materiales__encabezado, .material { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 54px; gap: 6px; }
   .ventana { padding: 24px 18px 20px; }
 }
 

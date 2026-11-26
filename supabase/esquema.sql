@@ -258,6 +258,10 @@ begin
   new.descripcion      := public.mayuscula_inicial(btrim(new.descripcion));
   new.autor            := public.limpiar_texto(new.autor);
   new.grupo_scout      := public.limpiar_texto(new.grupo_scout);
+  -- Si el grupo vino todo en minúsculas ("san borja 99"), mayúscula en cada palabra.
+  if new.grupo_scout is not null and new.grupo_scout = lower(new.grupo_scout) then
+    new.grupo_scout := initcap(new.grupo_scout);
+  end if;
   new.pais             := public.normalizar_pais(new.pais);
   new.tipo_instruccion := public.normalizar_instruccion(new.tipo_instruccion);
 
